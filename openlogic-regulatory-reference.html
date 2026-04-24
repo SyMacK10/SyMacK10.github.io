@@ -1,0 +1,504 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>OpenLogic Open Source Compliance Regulatory Reference</title>
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet">
+<style>
+  /* ==========================================================
+     OPENLOGIC BRAND TOKENS
+     Primary:   #4C00FF (violet), #00003A (ink / navy)
+     Secondary: #00CFFF (cyan),   #00FCCC (mint)
+     Neutral:   #F6F9FD (bg),     #FFFFFF (card)
+     ========================================================== */
+  :root {
+    /* Primary brand */
+    --ol-ink:          #00003A;
+    --ol-ink-soft:     #1A1E4D;
+    --ol-violet:       #4C00FF;
+    --ol-violet-dark:  #3A00C2;
+    --ol-violet-tint:  #EEE6FF;
+    --ol-violet-line:  #D4C2FF;
+
+    /* Secondary brand */
+    --ol-cyan:         #00CFFF;
+    --ol-mint:         #00FCCC;
+
+    /* Neutrals */
+    --ol-bg:           #F6F9FD;
+    --ol-card:         #FFFFFF;
+    --ol-text:         #00003A;
+    --ol-text-mid:     #3A4166;
+    --ol-text-muted:   #6B7290;
+    --ol-text-faint:   #A8ADC2;
+    --ol-line:         #E3E7F0;
+    --ol-line-soft:    #EEF1F7;
+
+    /* Status (functional, tuned to sit beside brand palette) */
+    --ol-red:          #D12C4A;
+    --ol-red-bg:       rgba(209,44,74,0.06);
+    --ol-red-line:     rgba(209,44,74,0.22);
+    --ol-amber:        #B45309;
+    --ol-amber-bg:     rgba(180,83,9,0.06);
+    --ol-amber-line:   rgba(180,83,9,0.22);
+    --ol-info:         #0077A8;
+    --ol-info-bg:      rgba(0,207,255,0.08);
+    --ol-info-line:    rgba(0,207,255,0.35);
+    --ol-gray:         #4A5070;
+    --ol-gray-bg:      rgba(74,80,112,0.06);
+    --ol-gray-line:    rgba(74,80,112,0.22);
+
+    /* Typography */
+    --ol-font-sans:    'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
+    --ol-font-mono:    'JetBrains Mono', 'SF Mono', Menlo, monospace;
+  }
+
+  * { margin: 0; padding: 0; box-sizing: border-box; }
+  body {
+    background: var(--ol-bg);
+    font-family: var(--ol-font-sans);
+    color: var(--ol-text);
+    -webkit-font-smoothing: antialiased;
+  }
+  .container { max-width: 900px; margin: 0 auto; padding: 48px 24px; }
+  .mono { font-family: var(--ol-font-mono); }
+
+  /* Header */
+  .logo-row { display: flex; align-items: center; gap: 10px; margin-bottom: 20px; }
+  .logo-mark {
+    width: 32px; height: 32px; background: var(--ol-ink);
+    border-radius: 6px; display: flex; align-items: center; justify-content: center;
+    position: relative; overflow: hidden;
+  }
+  .logo-mark::after {
+    content: ""; position: absolute; right: -2px; top: -2px;
+    width: 10px; height: 10px; background: var(--ol-violet); border-radius: 2px;
+  }
+  .logo-mark span {
+    color: #fff; font-size: 11px; font-weight: 700;
+    font-family: var(--ol-font-mono); position: relative; z-index: 1;
+  }
+  .logo-text {
+    font-size: 12px; font-weight: 600; color: var(--ol-text-muted);
+    letter-spacing: 0.08em; text-transform: uppercase;
+  }
+  h1 {
+    font-size: 36px; font-weight: 400; line-height: 1.15;
+    letter-spacing: -0.015em; margin-bottom: 8px; color: var(--ol-ink);
+  }
+  h1 strong { font-weight: 700; }
+  .subtitle {
+    font-size: 15px; color: var(--ol-text-mid); line-height: 1.6;
+    max-width: 620px; margin-top: 12px;
+  }
+  .source-note {
+    font-size: 12px; color: var(--ol-text-muted); margin-top: 8px;
+  }
+
+  /* Controls */
+  .controls {
+    display: flex; justify-content: space-between; align-items: center;
+    margin-bottom: 24px; flex-wrap: wrap; gap: 12px;
+  }
+  .filters { display: flex; gap: 6px; flex-wrap: wrap; }
+  .filter-btn {
+    padding: 6px 16px; border-radius: 20px;
+    border: 1.5px solid var(--ol-line); background: transparent;
+    color: var(--ol-text-mid); font-size: 13px; font-weight: 500;
+    cursor: pointer; font-family: var(--ol-font-sans); transition: all 0.2s;
+  }
+  .filter-btn.active {
+    border-color: var(--ol-violet); background: var(--ol-violet); color: #fff;
+  }
+  .filter-btn:hover:not(.active) {
+    border-color: var(--ol-violet); color: var(--ol-violet);
+  }
+  .expand-btn {
+    padding: 6px 14px; border-radius: 6px;
+    border: 1.5px solid var(--ol-line); background: transparent;
+    color: var(--ol-text-mid); font-size: 12px; font-weight: 500;
+    cursor: pointer; font-family: var(--ol-font-sans); transition: all 0.2s;
+  }
+  .expand-btn.active {
+    background: var(--ol-violet-tint); border-color: var(--ol-violet-line);
+    color: var(--ol-violet-dark);
+  }
+
+  /* Cards */
+  .cards { display: flex; flex-direction: column; gap: 12px; }
+  .card {
+    background: var(--ol-card);
+    border: 1px solid var(--ol-line);
+    border-radius: 10px; cursor: pointer;
+    transition: all 0.25s ease; overflow: hidden;
+  }
+  .card:hover { border-color: var(--ol-violet-line); }
+  .card.expanded {
+    box-shadow: 0 4px 20px rgba(76,0,255,0.10);
+    border-color: var(--ol-violet-line);
+  }
+  .card-header { padding: 18px 22px; display: flex; align-items: flex-start; gap: 14px; }
+  .card-header-content { flex: 1; min-width: 0; }
+  .card-title-row {
+    display: flex; align-items: center; gap: 10px;
+    flex-wrap: wrap; margin-bottom: 4px;
+  }
+  .card-title {
+    font-size: 17px; font-weight: 600; margin: 0; color: var(--ol-ink);
+  }
+  .card-summary {
+    font-size: 13px; color: var(--ol-text-mid); line-height: 1.55;
+  }
+  .card-chevron {
+    font-size: 18px; color: var(--ol-text-faint);
+    transition: transform 0.25s ease; margin-top: 2px;
+    user-select: none; flex-shrink: 0;
+  }
+  .card.expanded .card-chevron {
+    transform: rotate(180deg); color: var(--ol-violet);
+  }
+
+  /* Tags */
+  .urgency-tag {
+    font-size: 11px; font-weight: 600; padding: 2px 8px; border-radius: 4px;
+    display: inline-flex; align-items: center; gap: 4px; white-space: nowrap;
+  }
+  .urgency-tag .dot {
+    width: 5px; height: 5px; border-radius: 50%; display: inline-block;
+  }
+  .tag-live { color: var(--ol-red); background: var(--ol-red-bg); border: 1px solid var(--ol-red-line); }
+  .tag-live .dot { background: var(--ol-red); }
+  .tag-deadline { color: var(--ol-amber); background: var(--ol-amber-bg); border: 1px solid var(--ol-amber-line); }
+  .tag-deadline .dot { background: var(--ol-amber); }
+  .tag-upcoming { color: var(--ol-info); background: var(--ol-info-bg); border: 1px solid var(--ol-info-line); }
+  .tag-upcoming .dot { background: var(--ol-cyan); }
+  .tag-ongoing { color: var(--ol-gray); background: var(--ol-gray-bg); border: 1px solid var(--ol-gray-line); }
+  .tag-ongoing .dot { background: var(--ol-gray); }
+  .region-tag {
+    font-size: 11px; color: var(--ol-text-muted);
+    font-family: var(--ol-font-mono); white-space: nowrap;
+  }
+
+  /* Expanded content */
+  .card-body {
+    padding: 0 22px 22px; border-top: 1px solid var(--ol-line-soft); display: none;
+  }
+  .card.expanded .card-body { display: block; }
+  .detail-grid {
+    display: grid; grid-template-columns: 1fr 1fr; gap: 14px; padding-top: 16px;
+  }
+  .detail-cell { padding: 10px 12px; }
+  .detail-cell.highlight {
+    background: var(--ol-violet-tint);
+    border-radius: 6px;
+    border: 1px solid var(--ol-violet-line);
+  }
+  .detail-label {
+    font-size: 10px; font-weight: 700; color: var(--ol-text-muted);
+    text-transform: uppercase; letter-spacing: 0.1em; margin-bottom: 6px;
+  }
+  .detail-label.highlight-label { color: var(--ol-violet-dark); }
+  .detail-text {
+    font-size: 13px; color: var(--ol-text); line-height: 1.55;
+  }
+  .detail-text.mono { font-family: var(--ol-font-mono); white-space: pre-line; }
+
+  /* OpenLogic section - violet primary bar, mint accent stripe on upper half */
+  .ol-section {
+    margin-top: 14px; padding: 14px 16px 14px 18px;
+    background: var(--ol-card);
+    border-radius: 8px;
+    border: 1px solid var(--ol-violet-line);
+    border-left: 3px solid var(--ol-violet);
+    position: relative;
+  }
+  .ol-section::before {
+    content: ""; position: absolute; left: -3px; top: 0; height: 50%;
+    width: 3px; background: var(--ol-mint);
+  }
+  .ol-label {
+    font-size: 10px; font-weight: 700; color: var(--ol-violet-dark);
+    text-transform: uppercase; letter-spacing: 0.1em; margin-bottom: 6px;
+  }
+  .ol-text { font-size: 13.5px; color: var(--ol-text); line-height: 1.55; }
+  .ol-example {
+    font-size: 12.5px; color: var(--ol-text-mid); line-height: 1.5;
+    font-style: italic; padding-top: 10px; margin-top: 10px;
+    border-top: 1px solid var(--ol-line-soft);
+  }
+  .ol-caveat {
+    font-size: 11px; color: var(--ol-text-muted); line-height: 1.4;
+    font-style: italic; margin-top: 8px;
+  }
+
+  /* Legend */
+  .legend {
+    margin-top: 40px; padding: 16px 20px;
+    background: var(--ol-card); border: 1px solid var(--ol-line);
+    border-radius: 10px; display: flex; gap: 24px;
+    flex-wrap: wrap; align-items: center;
+  }
+  .legend-title {
+    font-size: 11px; font-weight: 600; color: var(--ol-text-muted);
+    text-transform: uppercase; letter-spacing: 0.08em;
+  }
+  .legend-item {
+    display: flex; align-items: center; gap: 6px;
+    font-size: 12px; color: var(--ol-text-mid);
+  }
+  .legend-dot {
+    width: 8px; height: 8px; border-radius: 50%; display: inline-block;
+  }
+
+  /* Footer */
+  .footer {
+    margin-top: 32px; padding-top: 20px;
+    border-top: 1px solid var(--ol-line);
+    display: flex; justify-content: space-between;
+    align-items: flex-start; flex-wrap: wrap; gap: 16px;
+  }
+  .footer-text {
+    font-size: 11px; color: var(--ol-text-muted); line-height: 1.6;
+    max-width: 520px;
+  }
+  .footer-link {
+    font-size: 11px; color: var(--ol-violet); margin-top: 8px;
+    font-family: var(--ol-font-mono);
+  }
+  .footer-version {
+    font-size: 11px; color: var(--ol-text-faint);
+    font-family: var(--ol-font-mono);
+  }
+
+  @media (max-width: 640px) {
+    h1 { font-size: 28px; }
+    .detail-grid { grid-template-columns: 1fr; }
+    .controls { flex-direction: column; align-items: flex-start; }
+  }
+
+  @media print {
+    .controls { display: none; }
+    .card { break-inside: avoid; page-break-inside: avoid; }
+    .card-body { display: block !important; }
+    .card-chevron { display: none; }
+    .card { cursor: default; }
+    body { background: #fff; }
+  }
+</style>
+</head>
+<body>
+
+<div class="container">
+  <!-- Header -->
+  <div style="margin-bottom: 48px;">
+    <div class="logo-row">
+      <div class="logo-mark"><span>OL</span></div>
+      <span class="logo-text">OpenLogic by Perforce</span>
+    </div>
+    <h1>Open Source Compliance<br><strong>Regulatory Reference</strong></h1>
+    <p class="subtitle">Seven regulations across EU and UK. Each card answers: what does this require, what does it mean for your open source stack, and how does OpenLogic help? Sorted by urgency.</p>
+    <p class="source-note">Data from the 2026 State of Open Source Report (712 organizations, with OSI and Eclipse Foundation). Updated April 2026.</p>
+  </div>
+
+  <!-- Controls -->
+  <div class="controls">
+    <div class="filters" id="filters">
+      <button class="filter-btn active" data-region="All">All</button>
+      <button class="filter-btn" data-region="EU">EU</button>
+      <button class="filter-btn" data-region="UK">UK</button>
+      <button class="filter-btn" data-region="EU/UK">EU/UK</button>
+    </div>
+    <button class="expand-btn" id="expandAll">Expand all</button>
+  </div>
+
+  <!-- Cards -->
+  <div class="cards" id="cards"></div>
+
+  <!-- Legend -->
+  <div class="legend">
+    <span class="legend-title">Status</span>
+    <span class="legend-item"><span class="legend-dot" style="background:var(--ol-red)"></span>In effect now</span>
+    <span class="legend-item"><span class="legend-dot" style="background:var(--ol-amber)"></span>Deadline approaching</span>
+    <span class="legend-item"><span class="legend-dot" style="background:var(--ol-cyan)"></span>On the horizon</span>
+    <span class="legend-item"><span class="legend-dot" style="background:var(--ol-gray)"></span>Ongoing enforcement</span>
+  </div>
+
+  <!-- Footer -->
+  <div class="footer">
+    <div>
+      <p class="footer-text">This reference is a practical positioning guide. Regulatory interpretations, penalty figures, and compliance claims should be validated with legal counsel before customer-facing use. Where requirements are not yet finalized (UK CS&R Bill, NIS2 national transpositions), OpenLogic's relevance is stated directionally. OpenLogic supports 400+ open source packages.</p>
+      <p class="footer-link">openlogic.com/supported-technology</p>
+    </div>
+    <p class="footer-version">v3.2 / April 2026</p>
+  </div>
+</div>
+
+<script>
+const REGULATIONS = [
+  {
+    id: "ce", name: "UK Cyber Essentials", region: "UK", status: "Live (Apr 27, 2026)", urgency: "live",
+    summary: "EOL open source in scope = automatic certification failure. 14-day patching mandate with documented evidence.",
+    timeline: "v3.3 (Danzell) effective now.\nApplies to all new assessments\ncreated after Apr 27, 2026.",
+    scope: "Any UK organization seeking certification. Required for government contracts involving sensitive data. Increasingly required by financial services and defense supply chains.",
+    requirements: "All in-scope software must be vendor-supported (A6.3, auto-fail). Critical/high-risk patches applied within 14 days (A6.4/A6.5, auto-fail). MFA mandatory on all cloud services. Documented, auditable evidence required.",
+    ossImplication: "Any EOL open source component in scope triggers automatic certification failure: CentOS 7, AngularJS, PHP 7.x, Spring Framework 5.x, legacy Node.js. Community projects may not release patches within the 14-day window. Organizations must prove when patches were applied with timestamps, not assertions.",
+    openlogicHelp: "LTS builds keep EOL packages in a vendor-supported lifecycle, satisfying A6.3 without requiring immediate migration. SLA-backed support provides a defined patch source and timestamped ticket history that serves as auditable evidence for the 14-day window.",
+    example: "Organization running CentOS 7 on production servers fails A6.3 automatically. With OpenLogic LTS, the component has an active vendor issuing CVE patches.",
+  },
+  {
+    id: "cra", name: "EU Cyber Resilience Act (CRA)", region: "EU", status: "Reporting: Sep 2026", urgency: "deadline",
+    summary: "Products shipped with EOL open source into the EU create direct legal liability. 24-hour vulnerability reporting starts September.",
+    timeline: "Reporting obligations:\nSep 11, 2026.\nFull product conformity:\nDec 11, 2027.",
+    scope: "Manufacturers of products with digital elements sold into the EU market. Includes commercialized open source embedded in enterprise or OEM offerings.",
+    requirements: "Report actively exploited vulnerabilities to ENISA within 24 hours. Maintain documented lifecycle security. Provide SBOMs. Security-by-design throughout product lifecycle.",
+    ossImplication: "Every open source component in a shipped product must have active security response. An EOL component with no upstream patches means the manufacturer cannot meet the 24-hour reporting obligation because no one is producing fixes. Example: a vendor shipping Spring Framework 5.x (EOL) into the EU market has no remediation path without extended support.",
+    openlogicHelp: "LTS builds extend the maintained lifecycle of EOL components with continued CVE patching. This closes the gap where community support has ended but the product is still in market, directly supporting the CRA's lifecycle maintenance requirement.",
+    caveat: "Penalty figures (up to 15M euros / 2.5% turnover) should be validated with legal before customer-facing use.",
+  },
+  {
+    id: "dora", name: "DORA", region: "EU", status: "In force (Jan 2025)", urgency: "live",
+    summary: "Financial entities must document ICT vendor relationships with SLAs. Unsupported open source = undocumented ICT risk.",
+    timeline: "Applicable now.\nCritical third-party provider\ndesignations ongoing through 2026.",
+    scope: "Banks, insurers, investment firms, payment providers, crypto-asset service providers, and their critical ICT third-party providers.",
+    requirements: "ICT risk management framework. Resilience testing. Incident reporting. Third-party risk management with documented contracts, SLAs, and tested exit strategies.",
+    ossImplication: "Open source components running without a vendor support agreement represent undocumented ICT risk under DORA. The 2026 State of Open Source Report found 31% of Enterprise Java teams in financial services spend 75-90% of their time on maintenance, signaling operational fragility in exactly the systems DORA targets.",
+    openlogicHelp: "OpenLogic provides a contracted vendor relationship with defined SLAs for open source infrastructure, satisfying DORA's third-party risk documentation requirements. The technology-agnostic model means exit strategy documentation is straightforward: no proprietary licensing to unwind.",
+    example: "Bank running Kafka and PostgreSQL in production without a support contract. DORA requires documented ICT third-party relationships. OpenLogic provides the contracted support.",
+  },
+  {
+    id: "nis2", name: "NIS2 Directive", region: "EU", status: "Transposition in progress", urgency: "deadline",
+    summary: "Supply chain audit requirements extend to the full open source footprint. One vendor covering the entire estate simplifies documentation.",
+    timeline: "Transposition deadline was Oct 2024.\nMost member states still finalizing.\nAudits expected mid-2026 onward.",
+    scope: "Essential and important entities across 18 sectors: energy, transport, health, digital infrastructure, managed service providers, public administration. Size-cap rule applies.",
+    requirements: "Risk management measures. Supply chain security and documentation. Incident reporting (24hr early warning, 72hr notification). Management accountability.",
+    ossImplication: "Organizations must document what open source they run, who maintains it, and how vulnerabilities are managed across every component. The 2026 State of Open Source Report found 37% cite lack of skilled personnel as their top OSS challenge, directly affecting the ability to meet NIS2's risk management requirements.",
+    openlogicHelp: "Full-stack support across 400+ packages provides a single documented vendor for the entire OSS estate. One support contract covers OS, middleware, databases, streaming, containers, and observability rather than requiring separate vendor relationships per component.",
+    example: "Healthcare provider running 12 different open source components. NIS2 requires supply chain documentation for each. OpenLogic covers all 12 under one contract.",
+  },
+  {
+    id: "data-act", name: "EU Data Act", region: "EU", status: "Applied (Sep 2025)", urgency: "deadline",
+    summary: "Switching fees eliminated by Jan 2027. Financial barriers to migrating from proprietary platforms to open source are disappearing.",
+    timeline: "General application: Sep 12, 2025.\nSwitching fee elimination:\nJan 11, 2027.",
+    scope: "Cloud service providers, data processing services, IoT manufacturers, organizations using connected products or cloud-based data processing.",
+    requirements: "Data portability rights. Cloud switching provisions. Elimination of switching fees by January 2027. Interoperability requirements.",
+    ossImplication: "The elimination of switching fees removes a financial barrier that has historically slowed migration from proprietary platforms to open source. Organizations locked into Confluent, Cloudera, or commercial Linux contracts gain leverage to exit as of January 2027.",
+    openlogicHelp: "Migration services from proprietary platforms to open source equivalents (Confluent to Kafka, Cloudera to Hadoop/Spark, commercial Linux to AlmaLinux/Rocky). The Data Act creates a window where OpenLogic's migration capability aligns with newly available buyer leverage.",
+    example: "Organization locked into Confluent with high switching fees. After January 2027, those fees are gone. OpenLogic provides the migration path to open source Kafka.",
+  },
+  {
+    id: "csr", name: "UK CS&R Bill", region: "UK", status: "In Parliament", urgency: "upcoming",
+    summary: "Managed service providers and critical suppliers brought into scope. Security measures across open source infrastructure will need documentation.",
+    timeline: "Royal Assent expected 2026.\nCodes of practice TBD.\nFull implementation possibly 2028.",
+    scope: "Critical national infrastructure, essential services, managed service providers, data centres (1MW+ IT load), designated critical suppliers.",
+    requirements: "Enhanced security and resilience measures (details in secondary legislation). Expanded incident reporting. Supply chain documentation. [Requirements not yet finalized.]",
+    ossImplication: "MSPs and critical suppliers are explicitly in scope. Organizations providing services on open source infrastructure will need to demonstrate documented security measures across that stack. Direction aligns with NIS2 principles; specifics depend on secondary legislation.",
+    openlogicHelp: "OpenLogic's support model aligns with the Bill's stated objectives around documented third-party service relationships. Specific compliance mapping should wait until requirements are finalized through secondary legislation and codes of practice.",
+    example: "Managed service provider running open source infrastructure for financial services clients. The Bill brings MSPs into scope. OpenLogic provides the vendor support layer.",
+  },
+  {
+    id: "gdpr", name: "GDPR / Data Residency", region: "EU/UK", status: "In force (2018)", urgency: "ongoing",
+    summary: "Data residency constraints favor open source deployed on sovereign infrastructure. 63% of EU/UK orgs cite vendor lock-in avoidance as a top OSS driver.",
+    timeline: "Ongoing enforcement.\nSchrems II constraints active.\nNo current US adequacy decision.",
+    scope: "Any organization processing personal data of EU/UK residents.",
+    requirements: "Data minimization. Processing location controls. Adequacy decisions or SCCs for cross-border transfers. Breach notification within 72 hours.",
+    ossImplication: "Proprietary platforms processing data through US infrastructure create transfer compliance risk under Schrems II. Open source alternatives deployed on EU-sovereign infrastructure give organizations direct control over data residency. The 2026 State of Open Source Report found 63% of EU/UK organizations cite avoiding vendor lock-in as a top OSS driver, with respondents volunteering 'data privacy confidence' unprompted.",
+    openlogicHelp: "Technology-agnostic guidance for selecting and deploying open source on EU-based or on-premises infrastructure where the organization controls data residency. Migration services support transitions from US-hosted proprietary platforms to self-hosted open source alternatives.",
+    example: "EU organization using a US-based SaaS analytics platform for customer data. Migrating to self-hosted open source on EU infrastructure eliminates the cross-border transfer issue.",
+  },
+];
+
+let currentFilter = "All";
+let allExpanded = false;
+let expandedCard = null;
+
+function escapeHtml(str) {
+  const div = document.createElement('div');
+  div.textContent = str;
+  return div.innerHTML;
+}
+
+function renderCards() {
+  const container = document.getElementById('cards');
+  const filtered = REGULATIONS.filter(r => currentFilter === "All" || r.region === currentFilter);
+
+  container.innerHTML = filtered.map(reg => {
+    const isExpanded = allExpanded || expandedCard === reg.id;
+    const tagClass = 'tag-' + reg.urgency;
+    const tagLabels = { live: "In effect now", deadline: "Deadline approaching", upcoming: "On the horizon", ongoing: "Ongoing enforcement" };
+
+    return `
+      <div class="card ${isExpanded ? 'expanded' : ''}" data-id="${reg.id}">
+        <div class="card-header">
+          <div class="card-header-content">
+            <div class="card-title-row">
+              <h2 class="card-title">${escapeHtml(reg.name)}</h2>
+              <span class="urgency-tag ${tagClass}"><span class="dot"></span>${tagLabels[reg.urgency]}</span>
+              <span class="region-tag">${escapeHtml(reg.region)}</span>
+            </div>
+            <p class="card-summary">${escapeHtml(reg.summary)}</p>
+          </div>
+          ${!allExpanded ? '<div class="card-chevron">\u25BE</div>' : ''}
+        </div>
+        <div class="card-body">
+          <div class="detail-grid">
+            <div class="detail-cell">
+              <div class="detail-label">Key Dates</div>
+              <p class="detail-text mono">${escapeHtml(reg.timeline)}</p>
+            </div>
+            <div class="detail-cell">
+              <div class="detail-label">Who It Applies To</div>
+              <p class="detail-text">${escapeHtml(reg.scope)}</p>
+            </div>
+            <div class="detail-cell">
+              <div class="detail-label">Core Requirements</div>
+              <p class="detail-text">${escapeHtml(reg.requirements)}</p>
+            </div>
+            <div class="detail-cell highlight">
+              <div class="detail-label highlight-label">What This Means for Open Source</div>
+              <p class="detail-text">${escapeHtml(reg.ossImplication)}</p>
+            </div>
+          </div>
+          <div class="ol-section">
+            <div class="ol-label">How OpenLogic Helps</div>
+            <p class="ol-text">${escapeHtml(reg.openlogicHelp)}</p>
+            ${reg.example ? `<p class="ol-example">Example: ${escapeHtml(reg.example)}</p>` : ''}
+            ${reg.caveat ? `<p class="ol-caveat">Note: ${escapeHtml(reg.caveat)}</p>` : ''}
+          </div>
+        </div>
+      </div>
+    `;
+  }).join('');
+
+  container.querySelectorAll('.card').forEach(card => {
+    card.addEventListener('click', () => {
+      if (allExpanded) return;
+      const id = card.dataset.id;
+      expandedCard = expandedCard === id ? null : id;
+      renderCards();
+    });
+  });
+}
+
+document.getElementById('filters').addEventListener('click', (e) => {
+  if (!e.target.classList.contains('filter-btn')) return;
+  currentFilter = e.target.dataset.region;
+  expandedCard = null;
+  document.querySelectorAll('.filter-btn').forEach(btn => btn.classList.remove('active'));
+  e.target.classList.add('active');
+  renderCards();
+});
+
+document.getElementById('expandAll').addEventListener('click', () => {
+  allExpanded = !allExpanded;
+  expandedCard = null;
+  const btn = document.getElementById('expandAll');
+  btn.textContent = allExpanded ? 'Collapse all' : 'Expand all';
+  btn.classList.toggle('active', allExpanded);
+  renderCards();
+});
+
+renderCards();
+</script>
+</body>
+</html>
